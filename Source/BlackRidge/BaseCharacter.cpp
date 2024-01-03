@@ -1,13 +1,24 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BaseCharacter.h"
-#include "Kismet/GameplayStatics.h"
+// #include "Kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
+#include "BaseWeapon.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	BaseMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Base Mesh"));
+	BaseMesh->SetupAttachment(RootComponent);
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	CameraComponent->SetupAttachment(RootComponent);
+	CameraComponent->SetRelativeLocation(FVector(6, 0, 64));
+	CameraComponent->bUsePawnControlRotation = true;
+	BaseMesh->AttachToComponent(CameraComponent, FAttachmentTransformRules::KeepRelativeTransform, TEXT("Mesh"));
 }
 
 // Called when the game starts or when spawned
@@ -15,18 +26,9 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// TArray<USceneComponent *> SkeletalMeshComponentArray2;
-
-	// TArray<AActor *> AttachedActors;
-	// GetAttachedActors(AttachedActors);
-	// for (auto *Attached : AttachedActors)
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("%s"), *Attached->GetName());
-
-	// 	// USceneComponent *AttachedSceneComponent = Cast<USceneComponent>(Attached);
-	// 	// FVector SocketLocation = AttachedSceneComponent->GetSocketLocation("MuzzleSocket");
-	// 	// UE_LOG(LogTemp, Warning, TEXT("%f"), SocketLocation);
-	// }
+	Weapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponClass);
+	Weapon->AttachToComponent(BaseMesh, FAttachmentTransformRules::KeepRelativeTransform, TEXT("GripPoint"));
+	Weapon->SetOwner(this);
 }
 
 // Called every frame
@@ -85,9 +87,15 @@ void ABaseCharacter::StartFire()
 {
 	bIsFiring = true;
 
-	GetWorldTimerManager().SetTimer(TimerHandle_ReFire, this, &ABaseCharacter::FireShot, FireRate, true, 0);
+	// Weapon->PullTrigger();
 
-	UE_LOG(LogTemp, Warning, TEXT("Firing"));
+	GetWorldTimerManager()
+		.SetTimer(TimerHandle_ReFire, this, &ABaseCharacter::FireShot, Weapon->GetFireRate(), true, 0);
+
+	// FireShot();
+
+	// GetWorldTimerManager()
+	// 	.SetTimer(TimerHandle_ReFire, this, &ABaseCharacter::FireShot, FireRate, true, 0);
 }
 
 void ABaseCharacter::StopFire()
@@ -95,24 +103,18 @@ void ABaseCharacter::StopFire()
 	bIsFiring = false;
 
 	GetWorldTimerManager().ClearTimer(TimerHandle_ReFire);
-
-	UE_LOG(LogTemp, Warning, TEXT("Stopped Firing"));
 }
 
 void ABaseCharacter::FireShot()
 {
-	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, this->GetMesh(), TEXT("MuzzleSocket"));
-	UGameplayStatics::SpawnSoundAttached(MuzzleSound, this->GetMesh(), TEXT("MuzzleSocket"));
+	Weapon->PullTrigger();
 
-	APlayerController *PlayerController = Cast<APlayerController>(this->GetController());
-	const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-	// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-	const FVector SpawnLocation = GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, this->GetMesh(), TEXT("MuzzleSocket"));
+	// UGameplayStatics::SpawnSoundAttached(MuzzleSound, this->GetMesh(), TEXT("MuzzleSocket"));
 
-	// Set Spawn Collision Handling Override
-	// FActorSpawnParameters ActorSpawnParams;
-	// ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+	// APlayerController *PlayerController = Cast<APlayerController>(this->GetController());
+	// const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+	// const FVector SpawnLocation = GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
 
-	// Spawn the projectile at the muzzle
-	GetWorld()->SpawnActor<AActor>(BulletToSpawn, SpawnLocation, SpawnRotation);
+	// GetWorld()->SpawnActor<AActor>(BulletToSpawn, SpawnLocation, SpawnRotation);
 }

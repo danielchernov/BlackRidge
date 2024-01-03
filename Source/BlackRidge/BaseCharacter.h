@@ -35,17 +35,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsFiring = false;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AActor> BulletToSpawn;
-	// UPROPERTY(EditAnywhere)
-	// TSubclassOf<USceneComponent> GunComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector MuzzleOffset;
-
-	// UPROPERTY(EditAnywhere)
-	// TSubclassOf<USceneComponent> GunMesh;
-
 private:
 	void MoveForward(float AxisValue);
 	void LookUp(float AxisValue);
@@ -57,11 +46,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	float RotationRate = 70;
 
-	UPROPERTY(EditAnywhere)
-	float FireRate = 0.5f;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ABaseWeapon> WeaponClass;
+
+	UPROPERTY()
+	class ABaseWeapon *Weapon;
+
+	UPROPERTY(VisibleAnywhere)
+	class UCameraComponent *CameraComponent;
 
 	UPROPERTY(EditAnywhere)
-	UParticleSystem *MuzzleFlash;
-	UPROPERTY(EditAnywhere)
-	USoundBase *MuzzleSound;
+	USkeletalMeshComponent *BaseMesh;
 };

@@ -14,12 +14,16 @@ class BLACKRIDGE_API ABaseBullet : public AActor
 public:
 	ABaseBullet();
 
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit);
+
 protected:
 	virtual void BeginPlay() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
 
+private:
 	UPROPERTY(EditAnywhere)
 	FVector Speed;
 	UPROPERTY(EditAnywhere)
@@ -29,4 +33,15 @@ public:
 
 	FTimerHandle Timer;
 	void DestroyTimer();
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent *BulletMesh;
+
+	UPROPERTY(EditAnywhere)
+	class UCapsuleComponent *CapsuleComponent;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem *HitEffect;
+	UPROPERTY(EditAnywhere)
+	USoundBase *HitSound;
 };
