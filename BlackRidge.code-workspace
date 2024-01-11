@@ -13,7 +13,12 @@
 		"typescript.tsc.autoDetect": "off",
 		"npm.autoDetect": "off",
 		"files.associations": {
-			"*.rh": "cpp"
+			"*.rh": "cpp",
+			"*.ipp": "cpp",
+			"string": "cpp",
+			"iosfwd": "cpp",
+			"filesystem": "cpp",
+			"xstring": "cpp"
 		}
 	},
 	"extensions": {

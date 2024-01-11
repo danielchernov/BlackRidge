@@ -17,6 +17,12 @@ public:
 
 	void PullTrigger();
 	float GetFireRate();
+	void StartReloading();
+	void Reload();
+	bool GetIsReloading();
+
+	int GetCurrentBullets();
+	int GetMaxBullets();
 
 protected:
 	// Called when the game starts or when spawned
@@ -44,6 +50,16 @@ private:
 	UPROPERTY(EditAnywhere)
 	USoundBase *MuzzleSound;
 
-	// UPROPERTY(EditAnywhere)
-	// FVector MuzzleOffset;
+	UPROPERTY(EditAnywhere)
+	int MagazineSize = 10;
+	UPROPERTY(EditAnywhere)
+	int MaxBullets = 100;
+
+	int CurrentBullets = 0;
+
+	UPROPERTY(EditAnywhere)
+	float ReloadTime = 2;
+	FTimerHandle ReloadTimerHandle;
+
+	bool bIsReloading = false;
 };

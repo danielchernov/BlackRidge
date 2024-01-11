@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BaseCharacter.h"
-// #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "BaseWeapon.h"
 
@@ -51,6 +50,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCompo
 
 	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &ABaseCharacter::StartFire);
 	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Released, this, &ABaseCharacter::StopFire);
+	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &ABaseCharacter::DetectReload);
 }
 
 void ABaseCharacter::MoveForward(float AxisValue)
@@ -83,19 +83,21 @@ void ABaseCharacter::LookRightRate(float AxisValue)
 	AddControllerYawInput(AxisValue * RotationRate * GetWorld()->GetDeltaSeconds());
 }
 
+void ABaseCharacter::DetectReload()
+{
+	if (!bIsReloading)
+	{
+		ABaseWeapon *WeaponInHand = Cast<ABaseWeapon>(Weapon);
+		WeaponInHand->StartReloading();
+	}
+}
+
 void ABaseCharacter::StartFire()
 {
 	bIsFiring = true;
 
-	// Weapon->PullTrigger();
-
 	GetWorldTimerManager()
 		.SetTimer(TimerHandle_ReFire, this, &ABaseCharacter::FireShot, Weapon->GetFireRate(), true, 0);
-
-	// FireShot();
-
-	// GetWorldTimerManager()
-	// 	.SetTimer(TimerHandle_ReFire, this, &ABaseCharacter::FireShot, FireRate, true, 0);
 }
 
 void ABaseCharacter::StopFire()
@@ -107,14 +109,18 @@ void ABaseCharacter::StopFire()
 
 void ABaseCharacter::FireShot()
 {
-	Weapon->PullTrigger();
+	if (!bIsReloading)
+	{
+		Weapon->PullTrigger();
+	}
+}
 
-	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, this->GetMesh(), TEXT("MuzzleSocket"));
-	// UGameplayStatics::SpawnSoundAttached(MuzzleSound, this->GetMesh(), TEXT("MuzzleSocket"));
+float ABaseCharacter::GetCurrentBullets() const
+{
+	return Weapon->GetCurrentBullets();
+}
 
-	// APlayerController *PlayerController = Cast<APlayerController>(this->GetController());
-	// const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-	// const FVector SpawnLocation = GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-
-	// GetWorld()->SpawnActor<AActor>(BulletToSpawn, SpawnLocation, SpawnRotation);
+float ABaseCharacter::GetMaxBullets() const
+{
+	return Weapon->GetMaxBullets();
 }

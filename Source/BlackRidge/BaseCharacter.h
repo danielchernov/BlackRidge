@@ -34,6 +34,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsFiring = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsReloading = false;
+
+	UFUNCTION(BlueprintPure)
+	float GetCurrentBullets() const;
+	UFUNCTION(BlueprintPure)
+	float GetMaxBullets() const;
 
 private:
 	void MoveForward(float AxisValue);
@@ -42,6 +49,7 @@ private:
 	void MoveRight(float AxisValue);
 	void LookRight(float AxisValue);
 	void LookRightRate(float AxisValue);
+	void DetectReload();
 
 	UPROPERTY(EditAnywhere)
 	float RotationRate = 70;
